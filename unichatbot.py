@@ -58,7 +58,7 @@ def voice_to_text():
         st.warning("🎤 Voice input not available in this environment.")
         return ""
 
-# ------------------ VOICE OUTPUT (WORKS ONLINE) ------------------
+# ------------------ VOICE OUTPUT ------------------
 def speak_text(text):
     try:
         tts = gTTS(text)
@@ -76,7 +76,7 @@ def speak_text(text):
     except Exception:
         st.warning("⚠️ Could not play audio output.")
 
-# ------------------ STREAMLIT UI ------------------
+# ------------------ STYLING ------------------
 st.markdown("""
     <style>
     body {
@@ -103,10 +103,16 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# ------------------ SESSION STATE ------------------
+if "last_query" not in st.session_state:
+    st.session_state.last_query = ""
+if "last_response" not in st.session_state:
+    st.session_state.last_response = ""
+
+# ------------------ APP UI ------------------
 st.title("🎓 University Enquiry Chatbot")
 st.write("Ask me anything about admissions, fees, courses, hostel, placements, etc.")
 
-# Sidebar
 st.sidebar.header("💡 Topics You Can Ask About")
 for q in faqs.keys():
     st.sidebar.write("👉 " + q.capitalize())
@@ -138,22 +144,26 @@ elif col5.button("💼 Placements"):
 elif col6.button("🎓 Scholarships"):
     button_pressed = "scholarships available"
 
-# Input
+# Text or voice input
 user_input = st.text_input("💬 Type your question:")
 
 if st.button("🎤 Ask by Voice"):
     user_input = voice_to_text()
     if user_input:
-        st.markdown(f"<div class='chat-bubble-user'>🧑‍🎓 You: {user_input}</div>", unsafe_allow_html=True)
+        st.session_state.last_query = user_input
+        st.session_state.last_response = chatbot_response(user_input)
 
-# Final Query
+# Process query
 final_input = button_pressed if button_pressed else user_input
-
 if final_input:
-    st.markdown(f"<div class='chat-bubble-user'>🧑‍🎓 You: {final_input}</div>", unsafe_allow_html=True)
-    response = chatbot_response(final_input)
-    st.markdown(f"<div class='chat-bubble-bot'>🤖 Bot: {response}</div>", unsafe_allow_html=True)
+    st.session_state.last_query = final_input
+    st.session_state.last_response = chatbot_response(final_input)
 
-    # Speech Output
-    if st.checkbox("🔊 Read out response"):
-        speak_text(response)
+# Display last message
+if st.session_state.last_query:
+    st.markdown(f"<div class='chat-bubble-user'>🧑‍🎓 You: {st.session_state.last_query}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='chat-bubble-bot'>🤖 Bot: {st.session_state.last_response}</div>", unsafe_allow_html=True)
+
+# Read out response
+if st.checkbox("🔊 Read out response"):
+    speak_text(st.session_state.last_response)
