@@ -1,6 +1,7 @@
 streamlit
 scikit-learn
-speechrecognition
+SpeechRecognition
 pyttsx3
 pandas
 numpy
+gTTS
