@@ -1,0 +1,6 @@
+streamlit
+SpeechRecognition
+pyttsx3
+scikit-learn
+pandas
+numpy
