@@ -3,6 +3,9 @@ import speech_recognition as sr
 import pyttsx3
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from gtts import gTTS
+import tempfile
+import base64
 
 # ------------------ FAQ DATABASE ------------------
 faqs = {
@@ -42,7 +45,7 @@ def chatbot_response(user_query):
     else:
         return "❌ Sorry, I don’t know the answer. Please contact the university office."
 
-# ------------------ VOICE & SPEECH ------------------
+# ------------------ VOICE INPUT ------------------
 def voice_to_text():
     try:
         recognizer = sr.Recognizer()
@@ -55,13 +58,23 @@ def voice_to_text():
         st.warning("🎤 Voice input not available in this environment.")
         return ""
 
+# ------------------ VOICE OUTPUT (WORKS ONLINE) ------------------
 def speak_text(text):
     try:
-        engine = pyttsx3.init()
-        engine.say(text)
-        engine.runAndWait()
+        tts = gTTS(text)
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fp:
+            tts.save(fp.name)
+            audio_file = open(fp.name, "rb")
+            audio_bytes = audio_file.read()
+            audio_base64 = base64.b64encode(audio_bytes).decode()
+            audio_html = f"""
+                <audio autoplay>
+                    <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
+                </audio>
+            """
+            st.markdown(audio_html, unsafe_allow_html=True)
     except Exception:
-        st.warning("🔊 Speech output not supported in this environment.")
+        st.warning("⚠️ Could not play audio output.")
 
 # ------------------ STREAMLIT UI ------------------
 st.markdown("""
@@ -133,7 +146,7 @@ if st.button("🎤 Ask by Voice"):
     if user_input:
         st.markdown(f"<div class='chat-bubble-user'>🧑‍🎓 You: {user_input}</div>", unsafe_allow_html=True)
 
-# Final query
+# Final Query
 final_input = button_pressed if button_pressed else user_input
 
 if final_input:
