@@ -8,7 +8,7 @@ Supports both **voice and text input**, and can speak answers back.
 - Real-time FAQ matching
 - Speech output (pyttsx3)
 - Modern UI with Streamlit
-
+run with streamlit : https://unichatbot-bzgzqr2v8kgzd5xjrqrdbr.streamlit.app/
 ## 🧠 Technologies
 - Python, Streamlit
 - scikit-learn (TF-IDF, Cosine Similarity)
